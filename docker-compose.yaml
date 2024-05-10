@@ -1,0 +1,33 @@
+version: '3.2'
+services:
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5050:5050"
+    networks:
+      - flask_postgres
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_USER}@db:5432/${POSTGRES_DB}
+
+  db:
+    image: postgres
+    container_name: 'postgres'
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_USER}
+      log_destination: stderr
+      logging_collector: "on"
+      log_directory: ./db/:/var/lib/postgresql/log
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db/:/var/lib/postgresql/data
+    networks:
+      - flask_postgres
+networks:
+  flask_postgres:
+    driver: bridge
